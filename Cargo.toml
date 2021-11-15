@@ -1,0 +1,10 @@
+[package]
+name = "check-mpi"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libc = "0.2"
+mpi = { git = "https://github.com/bsteinb/rsmpi", rev = "82e1d35703a43f2dad64ee9906eec0b9c007ecd8" }
