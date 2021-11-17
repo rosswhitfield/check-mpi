@@ -1,14 +1,15 @@
 pub fn get_hostname() -> String {
     let size = unsafe { libc::sysconf(libc::_SC_HOST_NAME_MAX) } as libc::size_t;
+
     let mut hostname = vec![0u8; size];
     unsafe {
         libc::gethostname(hostname.as_mut_ptr() as *mut libc::c_char, size);
     }
 
-    String::from_iter(hostname.iter().map(|&e| e as char))
+    String::from_iter(hostname.iter().filter(|&&e| e != 0_u8).map(|&e| e as char))
 }
 
-pub fn get_affinty() -> String {
+pub fn get_affinity() -> String {
     let mut mask: libc::cpu_set_t = unsafe { std::mem::zeroed() };
 
     unsafe {
@@ -55,4 +56,21 @@ pub fn get_affinty() -> String {
     }
 
     cpu_list
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_hostname() {
+        assert!(!get_hostname().is_empty());
+    }
+
+    #[test]
+    fn test_get_affinity() {
+        let affinity = get_affinity();
+        assert!(!affinity.is_empty());
+        assert_eq!(&affinity[..1], "0");
+    }
 }

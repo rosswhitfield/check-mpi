@@ -7,6 +7,6 @@ fn main() {
         "Hello from rank {}, on {}. (core affinity = {})",
         rank,
         checkmpi::get_hostname(),
-        checkmpi::get_affinty()
+        checkmpi::get_affinity()
     );
 }
