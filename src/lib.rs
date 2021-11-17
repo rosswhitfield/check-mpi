@@ -1,3 +1,6 @@
+/// Returns the hostname of the system
+///
+/// This uses a call to libc::gethostname
 pub fn get_hostname() -> String {
     let size = unsafe { libc::sysconf(libc::_SC_HOST_NAME_MAX) } as libc::size_t;
 
@@ -9,6 +12,9 @@ pub fn get_hostname() -> String {
     String::from_iter(hostname.iter().filter(|&&e| e != 0_u8).map(|&e| e as char))
 }
 
+/// Return the core affinity of the current process
+///
+/// This uses a call to libc::sched_getaffinity
 pub fn get_affinity() -> String {
     let mut mask: libc::cpu_set_t = unsafe { std::mem::zeroed() };
 
