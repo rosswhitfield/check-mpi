@@ -24,6 +24,10 @@ pub fn get_affinity() -> String {
 
     let size = unsafe { libc::sysconf(libc::_SC_NPROCESSORS_ONLN) } as libc::size_t;
 
+    mask_to_cpu_list(mask, size)
+}
+
+fn mask_to_cpu_list(mask: libc::cpu_set_t, size: libc::size_t) -> String {
     let mut cpu_list = String::new();
 
     let mut i = 0;
@@ -78,5 +82,30 @@ mod tests {
         let affinity = get_affinity();
         assert!(!affinity.is_empty());
         assert_eq!(&affinity[..1], "0");
+    }
+
+    #[test]
+    fn test_mask_to_cpu_list() {
+        let mut mask: libc::cpu_set_t = unsafe { std::mem::zeroed() };
+        assert_eq!(mask_to_cpu_list(mask, 16), "");
+        unsafe { libc::CPU_SET(0, &mut mask) };
+        assert_eq!(mask_to_cpu_list(mask, 16), "0");
+        unsafe { libc::CPU_SET(1, &mut mask) };
+        assert_eq!(mask_to_cpu_list(mask, 16), "0,1");
+        unsafe { libc::CPU_SET(2, &mut mask) };
+        assert_eq!(mask_to_cpu_list(mask, 16), "0-2");
+
+        unsafe { libc::CPU_ZERO(&mut mask) }
+        unsafe { libc::CPU_SET(1, &mut mask) };
+        unsafe { libc::CPU_SET(3, &mut mask) };
+        unsafe { libc::CPU_SET(4, &mut mask) };
+        unsafe { libc::CPU_SET(5, &mut mask) };
+        unsafe { libc::CPU_SET(6, &mut mask) };
+        unsafe { libc::CPU_SET(8, &mut mask) };
+        unsafe { libc::CPU_SET(9, &mut mask) };
+        unsafe { libc::CPU_SET(12, &mut mask) };
+        unsafe { libc::CPU_SET(14, &mut mask) };
+        unsafe { libc::CPU_SET(15, &mut mask) };
+        assert_eq!(mask_to_cpu_list(mask, 16), "1,3-6,8,9,12,14,15");
     }
 }
