@@ -3,16 +3,24 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-
   ci:
-
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        version: ['1.56', 'stable', 'nightly']
 
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get install -y openmpi-bin
-    - run: cargo fmt --all -- --check
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: ${{ matrix.version }}
+          override: true
+          components: rustfmt, clippy
+    - run: cargo version
     - run: cargo build
+    - run: cargo fmt --all -- --check
     - run: cargo run
     - run: cargo test
     - run: cargo clippy
