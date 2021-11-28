@@ -3,11 +3,8 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-
-  ci:
-
+  openmpi:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get install -y openmpi-bin
@@ -15,4 +12,20 @@ jobs:
     - run: cargo build
     - run: cargo run
     - run: cargo test
-    - run: cargo clippy
+    - run: cargo clippy -- -D warnings
+    - run: cargo build --release
+    - run: mpirun --version
+    - run: mpirun -n 2 ./target/release/checkmpi
+  mpich:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: sudo apt-get install -y mpich
+    - run: cargo fmt --all -- --check
+    - run: cargo build
+    - run: cargo run
+    - run: cargo test
+    - run: cargo clippy -- -D warnings
+    - run: cargo build --release
+    - run: mpiexec --version
+    - run: mpiexec -n 2 ./target/release/checkmpi
